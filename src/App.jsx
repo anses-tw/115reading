@@ -9,17 +9,23 @@ import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, serverTimest
 let app, auth, db, appId;
 let isFirebaseReady = false;
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDavgMvqO-A5ZD-0-McQm_9_DAe8l4Hrhk",
+  authDomain: "reading-115.firebaseapp.com",
+  projectId: "reading-115",
+  storageBucket: "reading-115.firebasestorage.app",
+  messagingSenderId: "388060451674",
+  appId: "1:388060451674:web:2260a3e9b88f442ba69963"
+};
+
 try {
-  if (typeof __firebase_config !== 'undefined') {
-    const firebaseConfig = JSON.parse(__firebase_config);
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    isFirebaseReady = true;
-  }
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  appId = '115reading';  // 您的專案名稱
+  isFirebaseReady = true;
 } catch (error) {
-  console.error("Firebase initialization failed:", error);
+  console.error("Firebase init error:", error);
 }
 
 // --- Constants & Data Structures ---
@@ -337,10 +343,17 @@ export default function App() {
         
         {/* === 新增：內嵌 Google Drive 區塊 === */}
         <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
-          <div className="bg-blue-50/80 px-5 py-3 border-b border-blue-100 flex justify-between items-center z-10">
-            <h3 className="font-bold text-blue-900 flex items-center text-lg">
-              <Cloud className="mr-2 text-blue-600" size={22} /> 🏫 團隊共用 Google 雲端硬碟
-            </h3>
+          <div className="bg-blue-50/80 px-5 py-3 border-b border-blue-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 z-10">
+            <div className="flex items-center flex-wrap gap-2">
+              <h3 className="font-bold text-blue-900 flex items-center text-lg">
+                <Cloud className="mr-2 text-blue-600" size={22} /> 🏫 團隊共用 Google 雲端硬碟
+              </h3>
+              {driveFolderId && (
+                <a href={sharedDriveLink} target="_blank" rel="noopener noreferrer" className="ml-0 sm:ml-2 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition flex items-center text-sm font-bold border border-blue-300 bg-white shadow-sm hover:shadow">
+                  <ExternalLink size={16} className="mr-1.5" /> 開啟雲端硬碟上傳
+                </a>
+              )}
+            </div>
             
             {/* 編輯網址按鈕 */}
             {!isEditingDriveLink ? (
@@ -389,9 +402,9 @@ export default function App() {
             )}
           </div>
           {driveFolderId && (
-            <div className="bg-gray-50 p-2 text-center border-t border-gray-200">
-              <p className="text-xs text-gray-500 flex items-center justify-center">
-                💡 若需「上傳」新檔案，請點擊上方畫面右上角的「<ExternalLink size={12} className="mx-1"/>彈出視窗」按鈕，於新分頁中操作上傳。
+            <div className="bg-gray-50 p-3 text-center border-t border-gray-200">
+              <p className="text-sm text-gray-600 flex items-center justify-center font-medium">
+                💡 若需上傳新檔案，請點擊上方的「<ExternalLink size={16} className="mx-1 text-blue-600"/>開啟雲端硬碟上傳」按鈕。
               </p>
             </div>
           )}
