@@ -462,15 +462,28 @@ export default function App() {
                <div className="text-center text-gray-400 text-sm mt-12">尚無推薦網址</div>
              ) : (
                <ul className="space-y-2">
-                {linkResources.map(res => (
+                {linkResources.map(res => {
+                  const isMe = res.uploader === userName;
+                  return (
                   <li key={res.id} className="flex items-center justify-between text-sm p-2.5 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition">
-                    <div className="flex items-center truncate mr-2">
+                    <div className="flex items-center truncate mr-2 flex-1">
                       <LinkIcon className="text-blue-500 mr-2 flex-shrink-0" size={16} />
                       <a href={res.link} target="_blank" rel="noopener noreferrer" className="truncate text-blue-700 hover:underline font-medium text-base">{res.name}</a>
                     </div>
-                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md flex-shrink-0">{res.uploader} 推薦</div>
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{res.uploader} 推薦</span>
+                      {isMe && (
+                        <button
+                          onClick={() => handleDeleteResource(res.id)}
+                          className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded transition-colors"
+                          title="刪除此連結"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
                   </li>
-                ))}
+                )})}
               </ul>
              )}
           </div>
