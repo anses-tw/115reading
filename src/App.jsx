@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, FolderOpen, Edit3, MessageSquare, AlertCircle, Save, FileText, CheckCircle2, Clock, Send, Link as LinkIcon, Plus, Pencil, X, User, Settings, Cloud, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Edit3, MessageSquare, AlertCircle, Save, FileText, CheckCircle2, Clock, Send, Link as LinkIcon, Plus, Pencil, X, User, Settings, Cloud, ExternalLink, Trash2 } from 'lucide-react';
 
 // --- Firebase Initialization (Follows Strict Rules) ---
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 
 let app, auth, db, appId;
 let isFirebaseReady = false;
@@ -97,7 +97,7 @@ const extractDriveId = (url) => {
 
 // --- Main Application Component ---
 export default function App() {
-  const [activeTab, setActiveTab] = useState('resources'); 
+  const [activeTab, setActiveTab] = useState('dashboard'); 
   const [showSettings, setShowSettings] = useState(false); 
   
   const [user, setUser] = useState(null);
@@ -164,14 +164,22 @@ export default function App() {
     const msgsRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
     const unsubMsgs = onSnapshot(msgsRef, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      msgs.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
+      msgs.sort((a, b) => {
+        const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : Date.now();
+        const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : Date.now();
+        return timeA - timeB;
+      });
       setMessages(msgs);
     }, (err) => console.error(err));
 
     const resRef = collection(db, 'artifacts', appId, 'public', 'data', 'resources');
     const unsubRes = onSnapshot(resRef, (snapshot) => {
       const res = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.sort((a, b) => (b.uploadedAt?.toMillis() || 0) - (a.uploadedAt?.toMillis() || 0));
+      res.sort((a, b) => {
+        const timeA = typeof a.uploadedAt?.toMillis === 'function' ? a.uploadedAt.toMillis() : Date.now();
+        const timeB = typeof b.uploadedAt?.toMillis === 'function' ? b.uploadedAt.toMillis() : Date.now();
+        return timeB - timeA;
+      });
       setResources(res);
     }, (err) => console.error(err));
 
@@ -250,6 +258,14 @@ export default function App() {
       const msgsRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
       await addDoc(msgsRef, { text: text, author: userName, createdAt: serverTimestamp() });
     } catch (err) { console.error("Message error:", err); }
+  };
+
+  const handleDeleteMessage = async (msgId) => {
+    if (!user || !isFirebaseReady) return;
+    try {
+      const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'messages', msgId);
+      await deleteDoc(msgRef);
+    } catch (err) { console.error("Delete message error:", err); }
   };
 
   const handleAddUrl = async () => {
