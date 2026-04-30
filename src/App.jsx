@@ -590,16 +590,24 @@ export default function App() {
               })
             )}
           </div>
-          <div className="p-4 bg-white border-t border-gray-100 flex items-center space-x-3">
-            <input 
-              type="text" 
-              className="flex-1 border border-gray-300 rounded-full px-5 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-base bg-gray-50"
-              placeholder={`以 ${userName} 的身分發言... (按 Enter 送出)`}
+          <div className="p-4 bg-white border-t border-gray-100 flex items-end space-x-3">
+            <textarea 
+              className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-base bg-gray-50 resize-y min-h-[50px] max-h-[200px] custom-scrollbar"
+              rows="1"
+              placeholder={`以 ${userName} 的身分發言... (按 Enter 送出，Shift + Enter 換行)`}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
-              onKeyDown={(e) => { if(e.key === 'Enter') handleSendMessage(inputMsg); }}
+              onKeyDown={(e) => { 
+                if(e.key === 'Enter' && !e.shiftKey) { 
+                  e.preventDefault();
+                  if(inputMsg.trim()) {
+                    handleSendMessage(inputMsg); 
+                    setInputMsg('');
+                  }
+                } 
+              }}
             />
-            <button onClick={() => { handleSendMessage(inputMsg); setInputMsg(''); }} disabled={!inputMsg.trim()} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full shadow-md transition-colors flex-shrink-0 disabled:opacity-50 font-bold">送出</button>
+            <button onClick={() => { handleSendMessage(inputMsg); setInputMsg(''); }} disabled={!inputMsg.trim()} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow-md transition-colors flex-shrink-0 disabled:opacity-50 font-bold mb-0.5">送出</button>
           </div>
         </div>
       </div>
