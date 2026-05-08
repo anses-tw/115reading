@@ -9,17 +9,23 @@ import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, serverTimest
 let app, auth, db, appId;
 let isFirebaseReady = false;
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDavgMvqO-A5ZD-0-McQm_9_DAe8l4Hrhk",
+  authDomain: "reading-115.firebaseapp.com",
+  projectId: "reading-115",
+  storageBucket: "reading-115.firebasestorage.app",
+  messagingSenderId: "388060451674",
+  appId: "1:388060451674:web:2260a3e9b88f442ba69963"
+};
+
 try {
-  if (typeof __firebase_config !== 'undefined') {
-    const firebaseConfig = JSON.parse(__firebase_config);
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    isFirebaseReady = true;
-  }
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  appId = '115reading';  // 您的專案名稱
+  isFirebaseReady = true;
 } catch (error) {
-  console.error("Firebase initialization failed:", error);
+  console.error("Firebase init error:", error);
 }
 
 // --- Constants & Data Structures ---
