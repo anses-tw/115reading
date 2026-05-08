@@ -9,23 +9,17 @@ import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, serverTimest
 let app, auth, db, appId;
 let isFirebaseReady = false;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDavgMvqO-A5ZD-0-McQm_9_DAe8l4Hrhk",
-  authDomain: "reading-115.firebaseapp.com",
-  projectId: "reading-115",
-  storageBucket: "reading-115.firebasestorage.app",
-  messagingSenderId: "388060451674",
-  appId: "1:388060451674:web:2260a3e9b88f442ba69963"
-};
-
 try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  appId = '115reading';  // 您的專案名稱
-  isFirebaseReady = true;
+  if (typeof __firebase_config !== 'undefined') {
+    const firebaseConfig = JSON.parse(__firebase_config);
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    isFirebaseReady = true;
+  }
 } catch (error) {
-  console.error("Firebase init error:", error);
+  console.error("Firebase initialization failed:", error);
 }
 
 // --- Constants & Data Structures ---
@@ -53,25 +47,25 @@ const INDICATORS = [
     subItems: [
       { id: '3-1', title: '(1) 閱讀教學計畫、執行及檢核之品質。', defaultHint: '共筆重點：課程品質維護與滾動式修正' },
       { id: '3-2', title: '(2) 圖書館資訊利用教育之規劃及執行。', defaultHint: '⚠️委員重點指出缺口：「圖書館資訊利用教育課程」需要被結構化地呈現。' },
-      { id: '3-3', title: '(3) 多元文本閱讀課程之規劃及執行。', defaultHint: '⚠️委員重點指出缺口：真正的「數位閱讀學習課程」需要被結構化地呈現。' },
-      { id: '3-4', title: '(4) 各學習領域閱讀策略教學之規劃及執行。', defaultHint: '共筆重點：各領域融入' },
+      { id: '3-3', title: '(3) 多領域、跨文本閱讀課程之規劃及執行。', defaultHint: '⚠️委員重點指出缺口：真正的「數位閱讀學習課程」需要被結構化地呈現。' },
+      { id: '3-4', title: '(4) 各學習階段、領域閱讀策略教學之規劃及執行。', defaultHint: '共筆重點：各領域融入' },
       { id: '3-5', title: '(5) 其他。' },
     ]
   },
   {
-    id: '4', title: '指標四：學生閱讀學習成效及影響',
+    id: '4', title: '指標四：學生閱讀學習過程、成效及影響',
     subItems: [
-      { id: '4-1', title: '(1) 學生閱讀能力及閱讀興趣之提升。', defaultHint: '共筆重點：SPARKLE 核心素養展現、閱讀興趣提升數據' },
+      { id: '4-1', title: '(1) 學生閱讀能力、閱讀興趣及閱讀習慣之培養。', defaultHint: '共筆重點：SPARKLE 核心素養展現、閱讀興趣提升數據' },
       { id: '4-2', title: '(2) 學生閱讀個別差異之輔導及協助。', defaultHint: '共筆重點：拔尖扶助成果' },
-      { id: '4-3', title: '(3) 學生運用閱讀能力進行重大議題之探究活動。' },
+      { id: '4-3', title: '(3) 學生運用閱讀素養進行議題探究活動及問題解決。' },
       { id: '4-4', title: '(4) 其他。' },
     ]
   },
   {
     id: '5', title: '指標五：閱讀推動專業精進與社群發展',
     subItems: [
-      { id: '5-1', title: '(1) 閱讀推動人員閱讀專業成長情形。' },
-      { id: '5-2', title: '(2) 閱讀推動人員閱讀教學社群成長情形。', defaultHint: '共筆重點：三大核心社群（低/中/高年級）運作機制、共備與觀議課紀錄' },
+      { id: '5-1', title: '(1) 全校教職員閱讀教育專業成長情形。' },
+      { id: '5-2', title: '(2) 全校教職員閱讀教學社群成長情形。', defaultHint: '共筆重點：三大核心社群（低/中/高年級）運作機制、共備與觀議課紀錄' },
       { id: '5-3', title: '(3) 閱讀推動組織及成員之專業發展機制。' },
       { id: '5-4', title: '(4) 其他。' },
     ]
@@ -282,6 +276,14 @@ export default function App() {
       setResourceUrl('');
       setResourceUrlTitle('');
     } catch (err) { console.error("Add URL error:", err); }
+  };
+
+  const handleDeleteResource = async (resId) => {
+    if (!user || !isFirebaseReady) return;
+    try {
+      const resRef = doc(db, 'artifacts', appId, 'public', 'data', 'resources', resId);
+      await deleteDoc(resRef);
+    } catch (err) { console.error("Delete resource error:", err); }
   };
 
   // --- Render Functions ---
